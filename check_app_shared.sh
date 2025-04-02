@@ -2,6 +2,7 @@
 
 # Define source and target folder names
 SOURCE_DIR="sub-tessell-dev/app-shared/infra-internal-1"
+CHANGES_MADE=0  # Flag to track if any changes were made
 
 # Check if the source folder exists
 if [ ! -d "$SOURCE_DIR" ]; then
@@ -22,7 +23,7 @@ for dir in sub-*; do
 
         # Check if "app-shared" exists inside the directory
         if [ -d "$TARGET_FOLDER" ]; then
-            echo "✅ 'app-shared' is already present in $dir."
+            echo "✅ 'app-shared' is already present in $dir. Skipping..."
         else
             echo "⚠️ 'app-shared' was NOT present in $dir."
 
@@ -35,18 +36,21 @@ for dir in sub-*; do
             echo "✅ 'infra-internal-1' has been copied to $dir/app-shared."
             echo "🚀 Now, the Resource Group can be deployed for DES in $dir."
 
-            # Navigate to the target directory and add the copied folder to Git
-            if [ -d "$TARGET_FOLDER/infra-internal-1" ]; then
-                git add "$TARGET_FOLDER/infra-internal-1"
-                echo "📝 Changes in '$dir/app-shared/infra-internal-1' have been added to Git."
-            else
-                echo "❌ Error: Failed to copy 'infra-internal-1' to $dir/app-shared."
-            fi
+            # Track that changes were made
+            CHANGES_MADE=1
+
+            # Add copied folder to Git
+            git add "$TARGET_FOLDER/infra-internal-1"
+            echo "📝 Changes in '$dir/app-shared/infra-internal-1' have been added to Git."
         fi
     fi
 done
 
-# Call the PowerShell script to commit and push changes
-echo "🔄 Running PowerShell script to commit and push changes..."
-pwsh ./commit_and_push.ps1 -commitMessage "Added infra-internal-1 to missing app-shared directories"
+# Run the PowerShell script **only if changes were made**
+if [ "$CHANGES_MADE" -eq 1 ]; then
+    echo "🔄 Running PowerShell script to commit and push changes..."
+    pwsh ./commit_and_push.ps1
+else
+    echo "✅ No changes detected. Nothing to commit."
+fi
 
