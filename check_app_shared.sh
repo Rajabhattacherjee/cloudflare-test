@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Source directory (where the app-shared folder exists)
-SOURCE_DIR="sub-tessell-dev/app-shared"
+# Define source and target folder names
+SOURCE_DIR="sub-tessell-dev/app-shared/infra-internal-1"
 
 # Check if the source folder exists
 if [ ! -d "$SOURCE_DIR" ]; then
@@ -9,7 +9,7 @@ if [ ! -d "$SOURCE_DIR" ]; then
     exit 1
 fi
 
-# Loop through all directories that start with "sub-"
+# Loop through all directories that start with "sub-*"
 for dir in sub-*; do
     # Skip the source directory itself
     if [ "$dir" == "sub-tessell-dev" ]; then
@@ -24,9 +24,16 @@ for dir in sub-*; do
         if [ -d "$TARGET_FOLDER" ]; then
             echo "'app-shared' is already present in $dir."
         else
-            # Copy "app-shared" from sub-tessell-dev
-            cp -r "$SOURCE_DIR" "$TARGET_FOLDER"
-            echo "'app-shared' was NOT present in $dir. It has been copied from sub-tessell-dev."
+            echo "'app-shared' was NOT present in $dir."
+
+            # Ensure the target "app-shared" folder exists before copying
+            mkdir -p "$TARGET_FOLDER"
+
+            # Copy only "infra-internal-1" from sub-tessell-dev
+            cp -r "$SOURCE_DIR" "$TARGET_FOLDER/"
+
+            echo "'infra-internal-1' has been copied to $dir/app-shared."
+            echo "✅ Now, the Resource Group can be deployed for DES in $dir."
         fi
     fi
 done
